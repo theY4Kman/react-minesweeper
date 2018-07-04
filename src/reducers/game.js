@@ -12,13 +12,13 @@ const initialState = {
   clear: false,
   bomb: config['easy'].bombNum,
   difficulty: 'easy'
-}
+};
 
 const game = (state = initialState, action) => {
   switch(action.type) {
     case TOGGLE_FLAG: {
-      const { flagged } = action.payload
-      let { bomb } = state
+      const { flagged } = action.payload;
+      let { bomb } = state;
       if (flagged) {
         bomb -= 1
       } else {
@@ -35,7 +35,7 @@ const game = (state = initialState, action) => {
       }
     }
     case CHANGE_DIFFICULTY: {
-      const { difficulty } = action.payload
+      const { difficulty } = action.payload;
       return {
         gameover: false,
         clear: false,
@@ -49,8 +49,11 @@ const game = (state = initialState, action) => {
     case CLEAR: {
       return Object.assign({}, state, { clear: true })
     }
-    default: return state
+
+    default: {
+      return state
+    }
   }
-}
+};
 
 export default game

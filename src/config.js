@@ -29,6 +29,6 @@ const config = {
     bombNum: 777,
     cellSize: 24
   }
-}
+};
 
 export default config

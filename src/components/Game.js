@@ -8,41 +8,42 @@ import '../styles/Game.css'
 
 class Game extends Component {
   constructor(props) {
-    super(props)
-    const { difficulty } = this.props
-    this.state = { board: this._initBoard(difficulty) }
-    this.handleClick = this.handleClick.bind(this)
-    this.handleClickCell = this.handleClickCell.bind(this)
-    this.handleRightClickCell = this.handleRightClickCell.bind(this)
+    super(props);
+    const { difficulty } = this.props;
+    this.state = { board: this.initBoard(difficulty) };
+    this.handleClick = this.handleClick.bind(this);
+    this.handleClickCell = this.handleClickCell.bind(this);
+    this.handleRightClickCell = this.handleRightClickCell.bind(this);
     this.handleDoubleClickCell = this.handleDoubleClickCell.bind(this)
   }
 
-  _initBoard(difficulty) {
-    const bombPlaces = this._initBombPlaces(difficulty)
-    const { boardWidth, boardHeight } = config[difficulty]
+  initBoard(difficulty) {
+    const bombPlaces = this.initBombPlaces(difficulty);
+    const { boardWidth, boardHeight } = config[difficulty];
     const board = Array.from(
       new Array(boardWidth), () => new Array(boardHeight).fill(
         { bomb: false, bombCount: 0, open: false, flagged: false }
       )
-    )
+    );
     for (let place of bombPlaces) {
       board[place.x][place.y] = Object.assign({}, board[place.x][place.y], { bomb: true })
     }
     return board
   }
 
-  _initBombPlaces(difficulty) {
-    const bombPlaces = []
-    const { boardWidth, boardHeight, bombNum } = config[difficulty]
+  initBombPlaces(difficulty) {
+    const bombPlaces = [];
+    const { boardWidth, boardHeight, bombNum } = config[difficulty];
+
     while (bombPlaces.length < bombNum) {
-      const x = Math.floor(Math.random() * boardWidth)
-      const y = Math.floor(Math.random() * boardHeight)
+      const x = Math.floor(Math.random() * boardWidth);
+      const y = Math.floor(Math.random() * boardHeight);
       if (bombPlaces.length === 0) {
         bombPlaces.push({ x: x, y: y })
       } else {
         const duplicated = bombPlaces.filter((place) => {
           return place.x === x && place.y === y
-        }).length > 0
+        }).length > 0;
         if (!duplicated) {
           bombPlaces.push({ x: x, y: y })
         }
@@ -52,32 +53,34 @@ class Game extends Component {
   }
 
   handleClick(e) {
-    e.preventDefault()
-    const { difficulty } = this.props
-    this.props.dispatch(init())
-    this.setState({ board: this._initBoard(difficulty) })
+    e.preventDefault();
+    const { difficulty } = this.props;
+    this.props.dispatch(init());
+    this.setState({ board: this.initBoard(difficulty) })
   }
 
   handleClickCell(x, y) {
-    const { gameover, clear } = this.props
+    const { gameover, clear } = this.props;
     if (gameover || clear) {
       return
     }
-    this._open(x, y)
+    this.open(x, y)
   }
 
   handleRightClickCell(x, y) {
-    const { gameover, clear } = this.props
+    const { gameover, clear } = this.props;
     if (gameover || clear) {
       return
+    } else {
+
+        this.toggleFlag(x, y)
     }
-    this._toggleFlag(x, y)
   }
 
   handleDoubleClickCell(x, y) {
-    const { gameover, clear, difficulty } = this.props
-    const { boardWidth, boardHeight } = config[difficulty]
-    const { board } = this.state
+    const { gameover, clear, difficulty } = this.props;
+    const { boardWidth, boardHeight } = config[difficulty];
+    const { board } = this.state;
     if (gameover || clear) {
       return
     }
@@ -93,24 +96,27 @@ class Game extends Component {
             (board[i][j].flagged)) {
           continue
         }
-        this._open(i, j)
+        this.open(i, j)
       }
     }
   }
 
   changeDifficulty(e) {
-    const difficulty = e.target.value
-    this.props.dispatch(changeDifficulty(difficulty))
-    this.setState({ board: this._initBoard(difficulty) })
+    const difficulty = e.target.value;
+    this.props.dispatch(changeDifficulty(difficulty));
+    this.setState({ board: this.initBoard(difficulty) })
   }
 
-  _open(x, y) {
-    const board = [].concat(this.state.board)
-    const { boardWidth, boardHeight } = config[this.props.difficulty]
-    if (!board[x][y].open) {
-      let bombCount = 0
-      for (let i = x - 1; i <= x + 1; i++) {
-        for (let j = y - 1; j <= y + 1; j++) {
+  open(x, y) {
+    const board = [].concat(this.state.board);
+    const cell = board[x][y];
+    const { boardWidth, boardHeight } = config[this.props.difficulty];
+
+    if (!cell.open) {
+      let bombCount = 0;
+
+      for (let i=x - 1; i<=x + 1; i++) {
+        for (let j=y - 1; j<=y + 1; j++) {
           if ((i < 0 || i >= boardWidth) ||
               (j < 0 || j >= boardHeight) ||
               (i === x && j === y)) {
@@ -121,19 +127,21 @@ class Game extends Component {
           }
         }
       }
-      board[x][y] = Object.assign({}, board[x][y], { open: true, bombCount: bombCount })
-      this.setState({ board })
-      if (board[x][y].flagged) {
-        this._toggleFlag(x, y)
+
+      board[x][y] = { ...cell, open: true, bombCount: bombCount };
+      this.setState({ board });
+
+      if (cell.flagged) {
+        this.toggleFlag(x, y)
       }
-      if (board[x][y].bomb) {
+      if (cell.bomb) {
         this.props.dispatch(gameover())
       }
-      if (this._isClear(board)) {
+      if (this.isClear(board)) {
         this.props.dispatch(clear())
       }
 
-      if (bombCount === 0 && !board[x][y].bomb) {
+      if (bombCount === 0 && !cell.bomb) {
         for (let i = x - 1; i <= x + 1; i++) {
           for (let j = y - 1; j <= y + 1; j++) {
             if ((i < 0 || i >= boardWidth) ||
@@ -142,41 +150,44 @@ class Game extends Component {
                 (board[i][j].flagged)) {
               continue
             }
-            this._open(i, j)
+            this.open(i, j)
           }
         }
       }
     }
   }
 
-  _isClear(board) {
-    let openCount = 0
-    const { difficulty } = this.props
-    const { boardWidth, boardHeight, bombNum } = config[difficulty]
+  isClear(board) {
+    let openCount = 0;
+    const { difficulty } = this.props;
+    const { boardWidth, boardHeight, bombNum } = config[difficulty];
     board.forEach((row, i) => {
       row.forEach((cell, i) => {
         if (cell.open) {
           openCount++
         }
       })
-    })
+    });
     return openCount === (boardWidth * boardHeight - bombNum)
   }
 
-  _toggleFlag(x, y) {
-    const board = [].concat(this.state.board)
-    const { flagged } = board[x][y]
-    board[x][y] = Object.assign({}, board[x][y], { flagged: !flagged })
-    this.setState({ board })
+  toggleFlag(x, y) {
+    const board = [].concat(this.state.board);
+    const cell = board[x][y];
+    const { flagged } = cell;
+
+    board[x][y] = { ...cell, flagged: !flagged };
+    this.setState({ board });
     this.props.dispatch(toggle(!flagged))
   }
 
   render() {
-    const { board } = this.state
-    const { difficulty, gameover, clear, bomb } = this.props
-    const { boardWidth, cellSize } = config[difficulty]
-    const boardWidthPx = boardWidth * cellSize
-    let status = <span className="status"></span>
+    const { board } = this.state;
+    const { difficulty, gameover, clear, bomb } = this.props;
+    const { boardWidth, cellSize } = config[difficulty];
+    const boardWidthPx = boardWidth * cellSize;
+
+    let status = <span className="status" />;
     if (gameover) {
       status = <span id="gameover" className="status">Gameover</span>
     } else if (clear) {
@@ -225,6 +236,6 @@ class Game extends Component {
   }
 }
 
-const mapStateToProps = (state) => state.game
+const mapStateToProps = (state) => state.game;
 
 export default connect(mapStateToProps)(Game)

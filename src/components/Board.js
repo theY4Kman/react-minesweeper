@@ -3,28 +3,22 @@ import Row from './Row'
 import '../styles/Board.css'
 
 export default class Board extends Component {
-  renderRows() {
-    const rows = []
-    this.props.board.forEach((row, i) => {
-      rows.push(
-        <Row
-          key={i}
-          row={row}
-          x={i}
-          cellSize={this.props.cellSize}
-          onClick={this.props.onClick}
-          onRightClick={this.props.onRightClick}
-          onDoubleClick={this.props.onDoubleClick}
-        />
-      )
-    })
-    return rows
-  }
-
   render() {
+    const { board, cellSize, onClick, onRightClick, onDoubleClick } = this.props;
+
     return (
       <div className="board">
-        {this.renderRows()}
+        {board.map((row, i) =>
+          <Row
+            key={i}
+            row={row}
+            x={i}
+            cellSize={cellSize}
+            onClick={onClick}
+            onRightClick={onRightClick}
+            onDoubleClick={onDoubleClick}
+          />
+        )}
       </div>
     )
   }
